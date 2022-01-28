@@ -73,9 +73,19 @@ FORMAT;
         $data = [];
         $lines = explode("\n", $output);
         foreach ($lines as $line) {
+            if (empty($line)) {
+                continue;
+            }
             $splitLine = explode(": ", $line);
-            [$fieldName, $fieldValue] = $splitLine;
-            $data[$fieldName] = trim($fieldValue);
+            $fieldName = $splitLine[0] ?? null;
+            $fieldValue = $splitLine[1] ?? null;
+            $fieldValue = trim($fieldValue ?? '');
+            if ($fieldName && str_contains(strtolower($fieldName), 'email')) {
+                // Git screws up :trim on emails sometimes so we'll do it ourselves.
+                $fieldValue = trim($fieldValue, "<>");
+            }
+
+            $data[$fieldName] = $fieldValue;
         }
         return $data;
     }
