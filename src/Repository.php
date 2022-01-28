@@ -25,10 +25,10 @@ class Repository {
     private $fileSystem;
 
     /** @var string */
-    private $dir;
+    protected $dir;
 
     /** @var string */
-    private $gitPath;
+    protected $gitPath;
 
     /**
      * Constructor.
@@ -80,7 +80,9 @@ class Repository {
         } catch (ProcessFailedException $e) {
             throw new GitException($e->getMessage(), 500, $e);
         }
-        return $process->getOutput();
+
+        $output = $process->getOutput();
+        return $output;
     }
 
     /**

@@ -36,7 +36,7 @@ class TestGitDirectory {
         $this->fs->mkdir($this->cwd);
         $process = new Process(["git", "init"], $this->cwd);
         $process->mustRun();
-        $this->repository = new Git\Repository($this->cwd);
+        $this->repository = new TestGitRepository($this->cwd);
         $this->configureAuthor($this->getAuthor());
     }
 
