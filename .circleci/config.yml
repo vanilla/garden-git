@@ -19,7 +19,7 @@ jobs:
     steps: &php-test-steps
       - run:
           name: Install PCov
-          run: |
+          command: |
             pecl install pcov && docker-php-ext-enable pcov
       - checkout
 
