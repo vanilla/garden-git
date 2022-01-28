@@ -43,8 +43,8 @@ jobs:
           name: PHPUnit
           command: |
               ./vendor/bin/phpunit ./tests \
-                --log-junit ~/phpunit/php-tests-junit.xml
+                --log-junit ./.coverage/php-tests-junit.xml
       - store_test_results:
-          path: ~/phpunit
+          path: ./.coverage
       - codecov/upload:
-          file: ~/phpunit/php-tests-junit.xml
+          file: ./.coverage/php-tests-junit.xml
