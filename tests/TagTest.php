@@ -25,6 +25,7 @@ class TagTest extends LocalGitTestCase {
         $this->dir()->touchFile("README.md");
         $firstCommit = $this->dir()->addAndCommitAll("Add README");
         $this->repo()->tagCommit($firstCommit, "readme-tag", "First tag");
+        sleep(1);
         $this->repo()->tagCommit($firstCommit, "readme-tag2", "First tag duplicate");
 
         $this->assertInitialMasterTags();
@@ -41,14 +42,18 @@ class TagTest extends LocalGitTestCase {
         $this->assertTagAuthors($tags[1], $this->dir()->getAuthor(), $this->dir()->getAuthor());
         $this->assertEquals($tags[0]->getCommit(), $tags[1]->getCommit(), 'The tags have the same commit.');
 
+        $actualNames = [$tags[0]->getName(), $tags[1]->getName()];
+        sort($actualNames);
         $this->assertEquals(
             ['readme-tag', 'readme-tag2'],
-            [$tags[0]->getName(), $tags[1]->getName()]
+            $actualNames
         );
 
+        $actualMessages = [$tags[0]->getMessage(), $tags[1]->getMessage()];
+        sort($actualMessages);
         $this->assertEquals(
             ['First tag', 'First tag duplicate'],
-            [$tags[0]->getMessage(), $tags[1]->getMessage()]
+            $actualMessages
         );
     }
 
