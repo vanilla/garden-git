@@ -25,31 +25,21 @@ class TagTest extends LocalGitTestCase {
         $this->dir()->touchFile("README.md");
         $firstCommit = $this->dir()->addAndCommitAll("Add README");
         $this->repo()->tagCommit($firstCommit, "readme-tag", "First tag");
-        $this->repo()->tagCommit($firstCommit, "readme-tag2", "First tag duplicate");
 
-        $this->assertInitialMasterTags();
+        $this->assertInitialMasterTag();
         return $firstCommit;
     }
 
     /**
      * Assert that the initial tags from testCreateAndListTags() are still present on its commit.
      */
-    private function assertInitialMasterTags() {
+    private function assertInitialMasterTag() {
         $tags = $this->repo()->getTags(new PartialBranch("master"));
-        $this->assertCount(2, $tags);
+        $this->assertCount(1, $tags);
         $this->assertTagAuthors($tags[0], $this->dir()->getAuthor(), $this->dir()->getAuthor());
-        $this->assertTagAuthors($tags[1], $this->dir()->getAuthor(), $this->dir()->getAuthor());
-        $this->assertEquals($tags[0]->getCommit(), $tags[1]->getCommit(), 'The tags have the same commit.');
 
-        $this->assertEquals(
-            ['readme-tag', 'readme-tag2'],
-            [$tags[0]->getName(), $tags[1]->getName()]
-        );
-
-        $this->assertEquals(
-            ['First tag', 'First tag duplicate'],
-            [$tags[0]->getMessage(), $tags[1]->getMessage()]
-        );
+        $this->assertEquals('readme-tag', $tags[0]->getName());
+        $this->assertEquals('First tag', $tags[0]->getMessage());
     }
 
 
@@ -59,6 +49,8 @@ class TagTest extends LocalGitTestCase {
      * @depends testCreateAndListTags
      */
     public function testTagsOnAnotherBranch() {
+        // Make sure times passes.
+        sleep(2);
         $branch = $this->repo()->createBranch('feature/new-branch');
         $this->repo()->switchBranch($branch);
         $this->dir()->touchFile("other-branch");
@@ -68,10 +60,10 @@ class TagTest extends LocalGitTestCase {
         $this->repo()->tagCommit($otherBranchCommit, "on-other-branch", "Tag is on a different branch");
 
         // Tags on master are still the same.
-        $this->assertInitialMasterTags();
+        $this->assertInitialMasterTag();
 
         // Assert that we have our own tag on our branch.
-        $this->assertTags($otherBranchCommit, ['on-other-branch', 'readme-tag', 'readme-tag2']);
+        $this->assertTags($otherBranchCommit, ['on-other-branch', 'readme-tag']);
     }
 
     /**
@@ -87,8 +79,8 @@ class TagTest extends LocalGitTestCase {
         sleep(1);
         $commitAhead = $this->dir()->addAndCommitAll("Commit #2");
         $this->repo()->tagCommit($commitAhead, "tag-on-commit2", "Tag on commit 2 message");
-        $this->assertTags($initialCommit, ['readme-tag', 'readme-tag2']);
-        $this->assertTags($commitAhead, ['tag-on-commit2', 'readme-tag', 'readme-tag2']);
+        $this->assertTags($initialCommit, ['readme-tag']);
+        $this->assertTags($commitAhead, ['tag-on-commit2', 'readme-tag']);
     }
 
     /**
