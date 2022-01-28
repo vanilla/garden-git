@@ -50,7 +50,7 @@ jobs:
                 ./vendor/bin/phpunit ./tests \
                 --log-junit ./.coverage/php-tests-junit.xml \
                 --coverage-clover ./.coverage/php-tests-coverage.xml \
-                --coverage-filter ./src
+                --whitelist ./src
       - store_test_results:
           path: ./.coverage
       - codecov/upload:
