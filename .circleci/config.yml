@@ -20,7 +20,7 @@ jobs:
       - run:
           name: Install PCov
           command: |
-            pecl install pcov && docker-php-ext-enable pcov
+            sudo pecl install pcov
       - checkout
 
       # - run: sudo apt update # PHP CircleCI 2.0 Configuration File# PHP CircleCI 2.0 Configuration File sudo apt install zlib1g-dev libsqlite3-dev
