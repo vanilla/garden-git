@@ -49,6 +49,8 @@ class TagTest extends LocalGitTestCase {
      * @depends testCreateAndListTags
      */
     public function testTagsOnAnotherBranch() {
+        // Make sure times passes.
+        sleep(2);
         $branch = $this->repo()->createBranch('feature/new-branch');
         $this->repo()->switchBranch($branch);
         $this->dir()->touchFile("other-branch");
