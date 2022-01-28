@@ -3,20 +3,21 @@
 version: 2.1
 
 orbs:
+  core: vanilla/core@2
   codecov: codecov/codecov@3.2.2
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  build:
+  php-tests-7.2:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     docker:
       # Specify the version you desire here
-      - image: cimg/php:7.2
+      - image: vanillaforums/php-mysql:7.2
 
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
-    steps:
+    steps: &php-test-steps
       - checkout
 
       # - run: sudo apt update # PHP CircleCI 2.0 Configuration File# PHP CircleCI 2.0 Configuration File sudo apt install zlib1g-dev libsqlite3-dev
@@ -49,3 +50,14 @@ jobs:
           path: ./.coverage
       - codecov/upload:
           file: ./.coverage/php-tests-coverage.xml
+  php-tests-7.4:
+    docker:
+      # Specify the version you desire here
+      - image: vanillaforums/php-mysql:7.4
+    steps: *php-test-steps
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - php-tests-7.4
+      - php-tests-7.2
