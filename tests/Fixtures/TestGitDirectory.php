@@ -8,14 +8,15 @@
 namespace Garden\Git\Tests\Fixtures;
 
 use Garden\Git;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Process\Process;
 
+/**
+ * Class that sets up git in a temporary directory.
+ */
 class TestGitDirectory {
-
-    public const USER_NAME = "Test Name";
-    public const USER_EMAIL = "test@example.com";
 
     /** @var string */
     private $cwd;
@@ -26,6 +27,9 @@ class TestGitDirectory {
     /** @var Git\Repository */
     private $repository;
 
+    /**
+     * Constructor.
+     */
     public function __construct() {
         $this->fs = new Filesystem();
         $this->cwd = Path::normalize(sys_get_temp_dir() . '/' . random_int(0, 100000));
@@ -36,14 +40,29 @@ class TestGitDirectory {
         $this->configureAuthor($this->getAuthor());
     }
 
+    /**
+     * Get the primary author we are using.
+     *
+     * @return Git\Author
+     */
     public function getAuthor(): Git\Author {
         return new Git\Author("Test Name", "test@example.com");
     }
 
+    /**
+     * Get an alternative author.
+     *
+     * @return Git\Author
+     */
     public function getAltAuthor(): Git\Author {
         return new Git\Author("Alt Name", "alt@example.com");
     }
 
+    /**
+     * Configure the current author.
+     *
+     * @param Git\Author $author
+     */
     public function configureAuthor(Git\Author $author) {
         $this->repository->git(["config", "user.name", $author->getName()]);
         $this->repository->git(["config", "user.email", $author->getEmail()]);
@@ -63,7 +82,14 @@ class TestGitDirectory {
         return $this->repository;
     }
 
-    public function addAndCommitAll(string $commitMsg): Git\PartialCommit {
+    /**
+     * Add and commit all files in the directory.
+     *
+     * @param string $commitMsg
+     *
+     * @return Git\Commit
+     */
+    public function addAndCommitAll(string $commitMsg): Git\Commit {
         $this->repository->git(["add", "."]);
         return $this->repository->commit($commitMsg);
     }
@@ -81,23 +107,32 @@ class TestGitDirectory {
         return $filePath;
     }
 
-    public function modifyFile(string $path, string $toAppend): string {
-        $filePath = Path::join($this->cwd, $path);
-        if (!$this->fs->exists($path)) {
-            throw new Git\Exception\NotFoundException('File', $filePath);
-        }
-
-        $this->fs->appendToFile($path, $toAppend);
-        return $filePath;
+    /**
+     * Assert that a file exists in the repo.
+     *
+     * @param string $path
+     */
+    public function assertFileExists(string $path) {
+        TestCase::assertTrue($this->fileExists($path), "Expected file $path to exist.");
     }
 
-    public function deleteFile(string $path): string {
-        $filePath = Path::join($this->cwd, $path);
-        if (!$this->fs->exists($path)) {
-            throw new Git\Exception\NotFoundException('File', $filePath);
-        }
+    /**
+     * Assert that a file does not exist in the repo.
+     *
+     * @param string $path
+     */
+    public function assertFileNotExists(string $path) {
+        TestCase::assertFalse($this->fileExists($path), "Expected file $path not to exist.");
+    }
 
-        $this->fs->remove($filePath);
-        return $filePath;
+    /**
+     * Check if a file exists in the repo.
+     *
+     * @param string $path
+     *
+     * @return bool
+     */
+    private function fileExists(string $path) {
+        return $this->fs->exists($this->getRepository()->absolutePath($path));
     }
 }

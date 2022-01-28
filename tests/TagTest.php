@@ -14,7 +14,7 @@ use Garden\Git\Tag;
 /**
  * Tests for fetching and creating tags.
  */
-class TagsTest extends LocalGitTestCase {
+class TagTest extends LocalGitTestCase {
 
     /**
      * Test that we can create and list tags.
@@ -59,7 +59,8 @@ class TagsTest extends LocalGitTestCase {
      * @depends testCreateAndListTags
      */
     public function testTagsOnAnotherBranch() {
-        $this->repo()->git(["checkout", "-b", "feature/new-branch"]);
+        $branch = $this->repo()->createBranch('feature/new-branch');
+        $this->repo()->switchBranch($branch);
         $this->dir()->touchFile("other-branch");
         $otherBranchCommit = $this->dir()->addAndCommitAll("On other branch");
         $this->repo()->git(["checkout", "master"]);
@@ -107,5 +108,38 @@ class TagsTest extends LocalGitTestCase {
 
         $this->assertTags($commit2, ["v2022.002", "v2022.001"], Tag::SORT_NEWEST_VERSION);
         $this->assertTags($commit2, ["v2022.001", "v2022.002"], Tag::SORT_NEWEST_COMMIT);
+    }
+
+    /**
+     * Test that a tag can have separate commit and tag authors.
+     */
+    public function testDifferentTagAndCommitAuthors() {
+        $this->dir()->touchFile("file1");
+        $commit1 = $this->dir()->addAndCommitAll("commit1");
+        $this->dir()->configureAuthor($this->dir()->getAltAuthor());
+        $tag = $this->repo()->tagCommit($commit1, "tag");
+        $this->assertAuthoredBy($tag, $this->dir()->getAltAuthor());
+        $this->assertAuthoredBy($tag->getCommit(), $this->dir()->getAuthor());
+    }
+
+    /**
+     * Test the branch not found exception.
+     */
+    public function testTagNotFound() {
+        $this->expectExceptionMessage('Tag Not Found: \'bad-tag\'');
+        $this->repo()->getTag('bad-tag');
+    }
+
+    /**
+     * Test that we can use a tag as a commitish and branch from it.
+     *
+     * @return void
+     */
+    public function testBranchFromTag() {
+        $this->dir()->touchFile("file1");
+        $commit = $this->dir()->addAndCommitAll("commit1");
+        $tag = $this->repo()->tagCommit($commit, "my-tag");
+        $branch = $this->repo()->createBranch("tagged-branch", $tag);
+        $this->assertEquals($commit->getCommitHash(), $branch->getCommitHash());
     }
 }

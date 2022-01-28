@@ -7,7 +7,9 @@
 
 namespace Garden\Git;
 
+use Garden\Git\Exception\GitException;
 use Garden\Schema\Schema;
+use Garden\Schema\ValidationException;
 
 class Tag implements AuthorableInterface, CommitishInterace {
 
@@ -104,21 +106,18 @@ FORMAT;
     /**
      * Create a tag from a single output of `git for-each-ref` with the format from `getFormat()`.
      *
-     * @param string $output The string output from git.
+     * @param string $outputLine A line of the string output from git.
      *
      * @return Tag
+     * @throws GitException If the output couldn't be parsed.
      */
-    public static function fromFormatOutput(string $output): Tag {
-        $output = trim($output);
-        // Split on newlines and treat each one how we would parse an http header.
-        $data = [];
-        $lines = explode("\n", $output);
-        foreach ($lines as $line) {
-            $splitLine = explode(": ", $line);
-            [$fieldName, $fieldValue] = $splitLine;
-            $data[$fieldName] = trim($fieldValue);
+    public static function fromGitOutputLine(string $outputLine): Tag {
+        $data = Commit::extractFormattedData($outputLine);
+        try {
+            $data = self::formattedOutputSchema()->validate($data);
+        } catch (ValidationException $e) {
+            throw new GitException($e->getMessage(), 422, $e);
         }
-        $data = self::formattedOutputSchema()->validate($data);
 
         $commitAuthor = new Author($data['committerName'], $data['committerEmail']);
         $commit = new Commit(
@@ -144,18 +143,15 @@ FORMAT;
     }
 
     private static function formattedOutputSchema(): Schema {
-        return Schema::parse([
-            'tag:s',
-            'commitHash:s',
-            'commitMessage:s',
-            'commitDate:dt',
-            'committerName:s',
-            'committerEmail:s',
-            'tagMessage:s?',
-            'tagDate:dt?',
-            'taggerName:s?',
-            'taggerEmail:s?',
-        ]);
+        return Commit::formattedOutputSchema()->merge(
+            Schema::parse([
+                'tag:s',
+                'tagMessage:s?',
+                'tagDate:dt?',
+                'taggerName:s?',
+                'taggerEmail:s?',
+            ])
+        );
     }
 
     ///
@@ -179,8 +175,8 @@ FORMAT;
     /**
      * @return string
      */
-    public function getCommitHash(): string {
-        return $this->getCommit()->getCommitHash();
+    public function getCommitish(): string {
+        return $this->getCommit()->getCommitish();
     }
 
     /**

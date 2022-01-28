@@ -7,6 +7,10 @@
 
 namespace Garden\Git;
 
+use Garden\Git\Exception\GitException;
+use Garden\Schema\Schema;
+use Garden\Schema\ValidationException;
+
 /**
  * Represents a git commit.
  */
@@ -25,7 +29,7 @@ class Commit implements AuthorableInterface, CommitishInterace {
     private $message;
 
     /**
-     * DI.
+     * Constructor.
      *
      * @param string $hash
      * @param \DateTimeInterface $date
@@ -37,6 +41,60 @@ class Commit implements AuthorableInterface, CommitishInterace {
         $this->date = $date;
         $this->author = $author;
         $this->message = $message;
+    }
+
+    public static function gitLogFormat(): string {
+        $format = <<<FORMAT
+commitHash: %h
+commitMessage: %s
+commitDate: %aI
+committerName: %an
+committerEmail: %ae
+FORMAT;
+        return $format;
+    }
+
+    public static function fromGitOutput(string $output): Commit {
+        $data = self::extractFormattedData($output);
+        try {
+            $data = self::formattedOutputSchema()->validate($data);
+        } catch (ValidationException $e) {
+            throw new GitException($e->getMessage(), 422, $e);
+        }
+
+        $author = new Author($data['committerName'], $data['committerEmail']);
+        $commit = new Commit($data['commitHash'], $data['commitDate'], $author, $data['commitMessage']);
+        return $commit;
+    }
+
+    public static function extractFormattedData(string $output): array {
+        $output = trim($output);
+        // Split on newlines and treat each one how we would parse an http header.
+        $data = [];
+        $lines = explode("\n", $output);
+        foreach ($lines as $line) {
+            $splitLine = explode(": ", $line);
+            [$fieldName, $fieldValue] = $splitLine;
+            $data[$fieldName] = trim($fieldValue);
+        }
+        return $data;
+    }
+
+    public static function formattedOutputSchema(): Schema {
+        return Schema::parse([
+            'commitHash:s',
+            'commitMessage:s',
+            'commitDate:dt',
+            'committerName:s',
+            'committerEmail:s',
+        ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getCommitish(): string {
+        return $this->hash;
     }
 
     /**

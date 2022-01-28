@@ -12,66 +12,108 @@ use Garden\Git\Tag;
 use Garden\Git\Tests\Fixtures\TestGitDirectory;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Test case for working with one of 2 git directories.
+ */
 class LocalGitTestCase extends TestCase {
 
     /** @var TestGitDirectory */
-    protected static $gitDirectory;
+    protected static $dir1;
 
     /** @var Git\Repository */
-    protected static $repository;
+    protected static $repo1;
 
+    /** @var TestGitDirectory */
+    protected static $dir2;
 
-    public function __construct($name = null, array $data = [], $dataName = '') {
-        parent::__construct($name, $data, $dataName);
-        $this->resetRepo();
+    /** @var Git\Repository */
+    protected static $repo2;
+
+    /**
+     * Reset the repositories.
+     */
+    protected function resetRepos() {
+        static::$dir1 = new TestGitDirectory();
+        static::$repo1 = static::$dir1->getRepository();
+        static::$dir2 = new TestGitDirectory();
+        static::$repo2 = static::$dir2->getRepository();
     }
 
-    public function resetRepo() {
-        static::$gitDirectory = new TestGitDirectory();
-        static::$repository = static::$gitDirectory->getRepository();
-    }
-
+    /**
+     * Reset repositories if we aren't starting up a dependent test.
+     */
     protected function setUp(): void {
         parent::setUp();
         if (!$this->hasDependencies()) {
-            $this->resetRepo();
+            $this->resetRepos();
         }
     }
 
+    /**
+     * @return Git\Repository
+     */
+    protected function repo(): Git\Repository {
+        return self::$repo1;
+    }
+
+    /**
+     * @return TestGitDirectory
+     */
+    protected function dir(): TestGitDirectory {
+        return self::$dir1;
+    }
+
+    /**
+     * @return Git\Repository
+     */
+    protected function repo2(): Git\Repository {
+        return self::$repo2;
+    }
+
+    /**
+     * @return TestGitDirectory
+     */
+    protected function dir2(): TestGitDirectory {
+        return self::$dir2;
+    }
+
+    ///
+    /// Assertions
+    ///
+
+    /**
+     * Assert something has a specific author.
+     *
+     * @param Git\AuthorableInterface $authorable
+     * @param Git\Author|null $expectedAuthor
+     */
+    protected function assertAuthoredBy(Git\AuthorableInterface $authorable, ?Git\Author $expectedAuthor) {
+        $this->assertEquals($expectedAuthor, $authorable->getAuthor());
+    }
+
+    /**
+     * Assert that we have a set of tags.
+     *
+     * @param Git\CommitishInterace $branch The commit to check tags on.
+     * @param array $expectedTagNames The expected tag names.
+     * @param string $sort What tag sort mode to fetch with.
+     */
     public function assertTags(Git\CommitishInterace $branch, array $expectedTagNames, string $sort = Tag::SORT_NEWEST_COMMIT) {
         $tags = $this->repo()->getTags($branch, $sort);
         $actualNames = [];
         foreach ($tags as $tag) {
             $actualNames[] = $tag->getName();
         }
-        $tagDates = $this->tagDates($tags);
         $this->assertSame($expectedTagNames, $actualNames);
     }
 
     /**
-     * @param Tag[] $tags
-     * @return array[]
+     * Assert a tags tag and commit authors.
+     *
+     * @param Tag $tag
+     * @param Git\Author|null $expectedTagAuthor
+     * @param Git\Author|null $expectedCommitAuthor
      */
-    private function tagDates(array $tags) {
-        return [
-            'commits' => array_map(function (Tag $tag) { return $tag->getCommit()->getDate()->format(\DateTimeInterface::RFC3339);}, $tags),
-            'tags' => array_map(function (Tag $tag) { return $tag->getDate()->format(\DateTimeInterface::RFC3339);}, $tags),
-        ];
-    }
-
-
-    protected function repo(): Git\Repository {
-        return self::$repository;
-    }
-
-    protected function dir(): TestGitDirectory {
-        return self::$gitDirectory;
-    }
-
-    protected function assertAuthoredBy(Git\AuthorableInterface $authorable, ?Git\Author $expectedAuthor) {
-        $this->assertEquals($expectedAuthor, $authorable->getAuthor());
-    }
-
     protected function assertTagAuthors(Git\Tag $tag, ?Git\Author $expectedTagAuthor, ?Git\Author $expectedCommitAuthor) {
         $this->assertAuthoredBy($tag, $expectedTagAuthor);
         $this->assertAuthoredBy($tag->getCommit(), $expectedTagAuthor);

@@ -27,7 +27,7 @@ final class PartialCommit implements CommitishInterace {
     /**
      * @return string
      */
-    public function getCommitHash(): string {
+    public function getCommitish(): string {
         return $this->commitHash;
     }
 }

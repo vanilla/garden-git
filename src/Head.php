@@ -8,12 +8,14 @@
 namespace Garden\Git;
 
 /**
- * Interface representing a git object that can be resolved to some commit object.
+ * Pointer to the current HEAD commit.
  */
-interface CommitishInterace {
+class Head implements CommitishInterace {
 
     /**
      * @return string
      */
-    public function getCommitish(): string;
+    public function getCommitish(): string {
+        return 'HEAD';
+    }
 }

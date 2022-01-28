@@ -10,7 +10,7 @@ namespace Garden\Git;
 class PartialBranch implements CommitishInterace {
 
     /** @var string */
-    private $name;
+    protected $name;
 
     /**
      * Constructor.
@@ -24,9 +24,16 @@ class PartialBranch implements CommitishInterace {
     /**
      * @inheritdoc
      */
-    public function getCommitHash(): string {
+    public function getCommitish(): string {
         // A branch name can be safely used in place of a git hash.
         // Git will resolve it to it's current HEAD commit.
+        return $this->name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string {
         return $this->name;
     }
 }
