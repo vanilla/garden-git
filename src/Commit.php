@@ -73,7 +73,13 @@ FORMAT;
         $data = [];
         $lines = explode("\n", $output);
         foreach ($lines as $line) {
+            if (empty($line)) {
+                continue;
+            }
             $splitLine = explode(": ", $line);
+            if (count($splitLine) !== 2) {
+                throw new GitException('Commit has too many parts: ' . $line);
+            }
             [$fieldName, $fieldValue] = $splitLine;
             $data[$fieldName] = trim($fieldValue);
         }
