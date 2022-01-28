@@ -46,6 +46,15 @@ class BranchTest extends LocalGitTestCase {
     }
 
     /**
+     * Test that we validate existing branch names.
+     * @depends testCreateBranch
+     */
+    public function testAddExistingBranch() {
+        $this->expectExceptionMessage('Branch already exists');
+        $this->repo()->createBranch("my-branch", new Git\Head());
+    }
+
+    /**
      * Test switching branches.
      */
     public function testSwitchBranch() {

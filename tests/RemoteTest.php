@@ -33,6 +33,16 @@ class RemoteTest extends LocalGitTestCase {
     }
 
     /**
+     * Test error handling for existing remote.
+     *
+     * @depends testAddRemote
+     */
+    public function testAddExistingRemote() {
+        $this->expectExceptionMessage('Remote already exists');
+        $this->repo()->addRemote(new Git\Remote('repo2', './somePath'));
+    }
+
+    /**
      * Test fetching remotes.
      *
      * @depends testAddRemote
@@ -59,6 +69,15 @@ class RemoteTest extends LocalGitTestCase {
         $this->dir()->assertFileExists('repo2file');
         $this->assertEquals($repo2Remote->getName(), $branch->getRemoteName());
         $this->assertEquals('repo2-branch', $branch->getRemoteBranchName());
+    }
+
+    /**
+     * Make sure we validate existing branches.
+     * @depends testCheckoutBranchFromRemote
+     */
+    public function testCheckoutBranchFromRemoteDuplicate() {
+        $this->expectExceptionMessage('Branch already exists');
+        $this->testCheckoutBranchFromRemote();
     }
 
     /**

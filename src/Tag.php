@@ -8,6 +8,7 @@
 namespace Garden\Git;
 
 use Garden\Git\Exception\GitException;
+use Garden\Git\Schema\GitSchema;
 use Garden\Schema\Schema;
 use Garden\Schema\ValidationException;
 
@@ -113,11 +114,7 @@ FORMAT;
      */
     public static function fromGitOutputLine(string $outputLine): Tag {
         $data = Commit::extractFormattedData($outputLine);
-        try {
-            $data = self::formattedOutputSchema()->validate($data);
-        } catch (ValidationException $e) {
-            throw new GitException($e->getMessage(), 422, $e);
-        }
+        $data = self::formattedOutputSchema()->validate($data);
 
         $commitAuthor = new Author($data['committerName'], $data['committerEmail']);
         $commit = new Commit(
@@ -144,7 +141,7 @@ FORMAT;
 
     private static function formattedOutputSchema(): Schema {
         return Commit::formattedOutputSchema()->merge(
-            Schema::parse([
+            GitSchema::parse([
                 'tag:s',
                 'tagMessage:s?',
                 'tagDate:dt?',

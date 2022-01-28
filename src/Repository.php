@@ -141,7 +141,7 @@ class Repository {
      * @return Tag[]
      * @throws GitException
      */
-    public function getTags(CommitishInterace $commitish = null, string $sort = Tag::SORT_NEWEST_COMMIT, int $limit = null): array {
+    public function getTags(CommitishInterace $commitish = null, string $sort = Tag::SORT_NEWEST_COMMIT): array {
         $args = [
             // Notably the `git log` command is considered a "porcelain" command
             // and can be influenced by a user's .gitconfig.
@@ -154,11 +154,6 @@ class Repository {
         if ($commitish !== null) {
             $args[] = "--merged";
             $args[] = $commitish->getCommitish();
-        }
-
-        if ($limit !== null) {
-            $args[] = '--count';
-            $args[] = $limit;
         }
 
         $args[] = 'refs/tags';
@@ -342,27 +337,9 @@ class Repository {
         return $newRemote;
     }
 
-    public function removeRemote(Remote $remote): void {
-        // Make sure it exists.
-        $this->getRemote($remote->getName());
-        $this->git(["remote", "rm", $remote->getName()]);
-    }
-
-    /**
-     * Get the repo as a local remote.
-     *
-     * @param string $remoteName The name to use for the remote.
-     *
-     * @return Remote
-     */
-    public function asLocalRemote(string $remoteName): Remote {
-        return new Remote($remoteName, $this->dir);
-    }
-
     ///
     /// Branches
     ///
-
 
     /**
      * Switch branches.
@@ -395,6 +372,10 @@ class Repository {
     }
 
     public function createBranch(string $branchName, CommitishInterace $startPoint = null) {
+        $existingBranch = $this->findBranch($branchName);
+        if ($existingBranch !== null) {
+            throw new GitException('Branch already exists: ' . $branchName);
+        }
         $startPoint = $startPoint ?? new Head();
         $this->git(["branch", $branchName, $startPoint->getCommitish()]);
         return $this->getBranch($branchName);
@@ -403,7 +384,7 @@ class Repository {
     public function createBranchFromRemote(PartialBranch $branch, Remote $remote, string $remoteBranchName): Branch {
         $existingBranch = $this->findBranch($branch);
         if ($existingBranch) {
-            throw new GitException("Can't create branch {$branch->getName()} from remote because it already exists.");
+            throw new GitException("Branch already exists: {$branch->getName()}");
         }
 
         $upstreamName = $remote->getName() . '/' . $remoteBranchName;
@@ -491,11 +472,11 @@ class Repository {
     private function validateRepositoryExists() {
         // Validate the directory.
         if (!$this->fileSystem->exists($this->dir)) {
-            throw new GitException("Directory {$this->dir} does not exist.");
+            throw new NotFoundException('Directory', $this->dir);
         }
 
         if (!$this->fileSystem->exists($this->absolutePath(".git"))) {
-            throw new GitException("{$this->dir} is not the root of a git repository.");
+            throw new NotFoundException('Git Root', $this->dir);
         }
     }
 }

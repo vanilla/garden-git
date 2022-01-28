@@ -105,13 +105,16 @@ class TagTest extends LocalGitTestCase {
     /**
      * Test that a tag can have separate commit and tag authors.
      */
-    public function testDifferentTagAndCommitAuthors() {
+    public function testDifferentTagAndCommitData() {
         $this->dir()->touchFile("file1");
         $commit1 = $this->dir()->addAndCommitAll("commit1");
+        sleep(1);
         $this->dir()->configureAuthor($this->dir()->getAltAuthor());
         $tag = $this->repo()->tagCommit($commit1, "tag");
         $this->assertAuthoredBy($tag, $this->dir()->getAltAuthor());
         $this->assertAuthoredBy($tag->getCommit(), $this->dir()->getAuthor());
+        // Assert dates are different.
+        $this->assertNotEquals($tag->getCommit()->getDate(), $tag->getDate());
     }
 
     /**

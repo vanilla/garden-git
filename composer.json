@@ -27,6 +27,22 @@
         "vanilla/garden-schema": "^1.13"
     },
     "require-dev": {
-        "phpunit/phpunit": "8"
+        "phpunit/phpunit": "^8.5"
+    },
+    "scripts": {
+        "tests": [
+            "phpunit ./tests --testdox"
+        ],
+        "tests:ci": [
+            "php --define pcov.enabled=1 ./vendor/bin/phpunit ./tests --log-junit ./.coverage/php-tests-junit.xml --coverage-clover ./.coverage/php-tests-coverage.xml --whitelist ./src"
+        ],
+        "tests:coverage": [
+            "php --define xdebug.mode=coverage ./vendor/bin/phpunit ./tests --coverage-html=./.coverage/php-tests-coverage.html --whitelist ./src"
+        ]
+    },
+    "scripts-descriptions": {
+        "tests": "Run all tests.",
+        "tests:ci": "Run tests for CI.",
+        "tests:coverage": "Run all tests and generate coverage reports. Requires PCov or XDebug extension installed."
     }
 }
