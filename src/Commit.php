@@ -78,9 +78,10 @@ FORMAT;
             }
             $splitLine = explode(": ", $line);
             if (count($splitLine) !== 2) {
-                throw new GitException('Commit has too many parts: ' . $line);
+                throw new GitException('Commit data should have 2 parts: ' . $line);
             }
-            [$fieldName, $fieldValue] = $splitLine;
+            $fieldName = $splitLine[0] ?? null;
+            $fieldValue = $splitLine[1] ?? null;
             $data[$fieldName] = trim($fieldValue);
         }
         return $data;
