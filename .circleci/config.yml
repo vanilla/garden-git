@@ -43,8 +43,9 @@ jobs:
           name: PHPUnit
           command: |
               ./vendor/bin/phpunit ./tests \
-                --log-junit ./.coverage/php-tests-junit.xml
+                --log-junit ./.coverage/php-tests-junit.xml \
+                --coverage-clover ./.coverage/php-tests-coverage.xml
       - store_test_results:
           path: ./.coverage
       - codecov/upload:
-          file: ./.coverage/php-tests-junit.xml
+          file: ./.coverage/php-tests-coverage.xml
