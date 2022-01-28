@@ -120,11 +120,11 @@ class Repository {
      * Locate a tag by it's name.
      *
      * @param string $tagName
-     * @return Tag|null
+     * @return Tag
      * @throws GitException
      * @throws NotFoundException
      */
-    public function getTag(string $tagName): ?Tag {
+    public function getTag(string $tagName): Tag {
         $tag = $this->findTag($tagName);
         if ($tag === null) {
             throw new NotFoundException('Tag', $tagName);
@@ -371,6 +371,13 @@ class Repository {
         return null;
     }
 
+    /**
+     * @param string $branchName
+     * @param CommitishInterace|null $startPoint
+     * @return Branch
+     * @throws GitException
+     * @throws NotFoundException
+     */
     public function createBranch(string $branchName, CommitishInterace $startPoint = null) {
         $existingBranch = $this->findBranch($branchName);
         if ($existingBranch !== null) {
@@ -381,11 +388,25 @@ class Repository {
         return $this->getBranch($branchName);
     }
 
-    public function createBranchFromRemote(PartialBranch $branch, Remote $remote, string $remoteBranchName): Branch {
+    /**
+     * Create a branch from a remote.
+     *
+     * @param string|PartialBranch $branch The name of the new local branch.
+     * @param Remote $remote The remote to pull from.
+     * @param string $remoteBranchName The name of the remote branch.
+     *
+     * @return Branch The new branch.
+     *
+     * @throws GitException
+     * @throws NotFoundException
+     */
+    public function createBranchFromRemote($branch, Remote $remote, string $remoteBranchName): Branch {
         $existingBranch = $this->findBranch($branch);
         if ($existingBranch) {
             throw new GitException("Branch already exists: {$branch->getName()}");
         }
+
+        $remoteBranchName = $remoteBranchName ?? $existingBranch->getName();
 
         $upstreamName = $remote->getName() . '/' . $remoteBranchName;
 
