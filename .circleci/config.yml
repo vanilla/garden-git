@@ -49,7 +49,8 @@ jobs:
               php --define pcov.enabled=1 \
                 ./vendor/bin/phpunit ./tests \
                 --log-junit ./.coverage/php-tests-junit.xml \
-                --coverage-clover ./.coverage/php-tests-coverage.xml
+                --coverage-clover ./.coverage/php-tests-coverage.xml \
+                --coverage-filter ./src
       - store_test_results:
           path: ./.coverage
       - codecov/upload:
