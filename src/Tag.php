@@ -94,12 +94,12 @@ committerEmail: %(*authoremail:trim)
 tagMessage: %(subject)
 tagDate: %(taggerdate:iso-strict)
 taggerName: %(taggername)
-taggerEmail: %(taggeremail:trim)%(else)
+taggerEmail: %(taggeremail)%(else)
 commitHash: %(objectname)
 commitMessage: %(subject)
 commitDate: %(authordate:iso-strict)
 committerName: %(authorname)
-committerEmail: %(authoremail:trim)%(end)
+committerEmail: %(authoremail)%(end)
 FORMAT;
     }
 

@@ -79,7 +79,13 @@ FORMAT;
             $splitLine = explode(": ", $line);
             $fieldName = $splitLine[0] ?? null;
             $fieldValue = $splitLine[1] ?? null;
-            $data[$fieldName] = trim($fieldValue);
+            $fieldValue = trim($fieldValue ?? '');
+            if ($fieldName && str_contains(strtolower($fieldName), 'email')) {
+                // Git screws up :trim on emails sometimes so we'll do it ourselves.
+                $fieldValue = trim($fieldValue, "<>");
+            }
+
+            $data[$fieldName] = $fieldValue;
         }
         return $data;
     }
