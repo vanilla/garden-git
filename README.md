@@ -1,4 +1,4 @@
-# vanillaforums/garden-git
+# vanilla/garden-git
 
 An object-oriented PHP library for working Git.
 
