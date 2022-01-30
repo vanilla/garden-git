@@ -53,10 +53,6 @@ class Repository {
         $this->validateRepositoryExists();
     }
 
-    ///
-    /// Public interface.
-    ///
-
     /**
      * Get a full file path relative within the repository.
      *
@@ -74,6 +70,7 @@ class Repository {
      * @param string[] $args The git subcommand and arguments.
      *
      * @return string The successful output of the command.
+     *
      * @throws GitException If the command did not execute successfully.
      */
     public function git(array $args): string {
@@ -105,7 +102,9 @@ class Repository {
      * Locate a tag by it's name.
      *
      * @param string $tagName
+     *
      * @return Tag|null
+     *
      * @throws GitException
      */
     public function findTag(string $tagName): ?Tag {
@@ -123,7 +122,9 @@ class Repository {
      * Locate a tag by it's name.
      *
      * @param string $tagName
+     *
      * @return Tag
+     *
      * @throws GitException
      * @throws NotFoundException
      */
@@ -139,9 +140,9 @@ class Repository {
      * Get tags reachable on a current branch.
      *
      * @param CommitishInterace|null $commitish Only output tags reachable from the HEAD of this branch.
-     * @param int|null $limit The limit of tags to fetch.
      *
      * @return Tag[]
+     *
      * @throws GitException
      */
     public function getTags(CommitishInterace $commitish = null, string $sort = Tag::SORT_NEWEST_COMMIT): array {
@@ -182,6 +183,7 @@ class Repository {
      * @param string $msg The commit message.
      *
      * @return Commit
+     *
      * @throws GitException If the commit could not be completed.
      */
     public function commit(string $msg): Commit {
@@ -239,10 +241,14 @@ class Repository {
     }
 
     /**
+     * Create an annotated tag for a commit.
+     *
      * @param string $tagName
      * @param string $message
      * @param CommitishInterace $from
-     * @return void
+     *
+     * @return Tag
+     *
      * @throws GitException
      */
     public function tagCommit(CommitishInterace $from, string $tagName, string $message = ""): Tag {
@@ -258,6 +264,23 @@ class Repository {
         return $this->getTag($tagName);
     }
 
+    /**
+     * Delete a tag from the remote.
+     *
+     * @param Tag $tag
+     *
+     * @throws NotFoundException
+     * @throws GitException
+     */
+    public function deleteTag(Tag $tag): void {
+        $tag = $this->getTag($tag->getName());
+        $this->git([
+            'tag',
+            '--delete',
+            $tag->getName(),
+        ]);
+    }
+
     ///
     /// Remotes
     ///
@@ -266,6 +289,8 @@ class Repository {
      * Get the current remotes for this repo.
      *
      * @return Remote[]
+     *
+     * @throws GitException
      */
     public function getRemotes(): array {
         $gitOutput = $this->git(["remote", "-v"]);
@@ -282,6 +307,7 @@ class Repository {
      * @param string $remoteName The name of the remote to find.
      *
      * @return Remote|null
+     * @throws GitException
      */
     public function findRemote(string $remoteName): ?Remote {
         $remotes = $this->getRemotes();
@@ -299,7 +325,9 @@ class Repository {
      * @param string $name The remote.
      *
      * @return Remote
+     *
      * @throws NotFoundException
+     * @throws GitException
      */
     public function getRemote(string $name): Remote {
         $remote = $this->findRemote($name);
@@ -309,10 +337,14 @@ class Repository {
         return $remote;
     }
 
+    /**
+     * Fetch everything from a remote.
+     *
+     * @param Remote $remote
+     *
+     * @throws GitException
+     */
     public function fetchFromRemote(Remote $remote): void {
-        // Make sure the remote still exists.
-        $remote = $this->getRemote($remote->getName());
-
         $this->git(['fetch', $remote->getName()]);
     }
 
@@ -340,6 +372,21 @@ class Repository {
         return $newRemote;
     }
 
+    /**
+     * Remove a remote from the repo.
+     *
+     * @param Remote $remote
+     *
+     * @throws GitException
+     */
+    public function removeRemote(Remote $remote): void {
+        $this->git([
+            'remote',
+            'remove',
+            $remote->getName()
+        ]);
+    }
+
     ///
     /// Branches
     ///
@@ -348,6 +395,8 @@ class Repository {
      * Switch branches.
      *
      * @param Branch $branch
+     *
+     * @throws GitException
      */
     public function switchBranch(Branch $branch): void {
         $existingBranch = $this->getBranch($branch->getName());
@@ -359,8 +408,12 @@ class Repository {
     }
 
     /**
+     * Lookup a branch.
+     *
      * @param string|PartialBranch $branchName
+     *
      * @return Branch|null
+     *
      * @throws GitException
      */
     public function findBranch($branchName): ?Branch {
@@ -375,9 +428,13 @@ class Repository {
     }
 
     /**
+     * Create a branch from a commit, tag, or other branch.
+     *
      * @param string $branchName
      * @param CommitishInterace|null $startPoint
+     *
      * @return Branch
+     *
      * @throws GitException
      * @throws NotFoundException
      */
@@ -396,13 +453,17 @@ class Repository {
      *
      * @param Branch $branch The branch to delete.
      * @param bool $pushDeleteToRemote If true, also delete the branch on its configured remote.
+     *
      * @throws GitException
+     * @throws NotFoundException
      */
     public function deleteBranch(Branch $branch, bool $pushDeleteToRemote = false): void {
+        $branch = $this->getBranch($branch->getName());
         $currentBranch = $this->currentBranch();
         if ($currentBranch->getName() === $branch->getName()) {
             throw new GitException('Cannot delete the checked out branch: ' . $branch->getName());
         }
+
         $this->git([
             'branch',
             '--delete',
@@ -414,7 +475,9 @@ class Repository {
                 'push',
                 $branch->getRemoteName(),
                 '--delete',
-                $branch->getRemoteBranchName(),
+                // Be specific that it's a branch
+                // Otherwise we could have mismatch between tags and branches.
+                'refs/heads/' . $branch->getRemoteBranchName(),
             ]);
         }
     }
@@ -457,7 +520,9 @@ class Repository {
      * @param string|PartialBranch $branchName The remote.
      *
      * @return Branch
+     *
      * @throws NotFoundException
+     * @throws GitException
      */
     public function getBranch($branchName): Branch {
         $branchName = $branchName instanceof PartialBranch ? $branchName->getName() : $branchName;
@@ -469,7 +534,10 @@ class Repository {
     }
 
     /**
+     * Get all branches.
+     *
      * @return Branch[]
+     *
      * @throws GitException
      */
     public function getBranches(): array {
@@ -491,6 +559,14 @@ class Repository {
         return $branches;
     }
 
+    /**
+     * Get the current branch.
+     *
+     * @return Branch
+     *
+     * @throws GitException
+     * @throws NotFoundException
+     */
     public function currentBranch(): Branch {
         $gitOutput = $this->git([
             'rev-parse',
@@ -500,6 +576,17 @@ class Repository {
         return $this->getBranch(trim($gitOutput));
     }
 
+    /**
+     * Push a branch to a remote.
+     *
+     * @param Branch $branch
+     * @param Remote $remote
+     *
+     * @return Branch
+     *
+     * @throws GitException
+     * @throws NotFoundException
+     */
     public function pushBranch(Branch $branch, Remote $remote): Branch {
         $branchName = $branch->getName();
         $remoteBranchName = $branch->getRemoteBranchName() ?: $branchName;

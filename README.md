@@ -52,6 +52,9 @@ $newBranch = $repo->createBranch("new/branch-name", $existingBranch);
 $newBranch = $repo->createBranch("new/branch-name", new Git\PartialBranch("old/branch-name"));
 $newBranch = $repo->createBranch("new/branch-name", $existingCommit);
 
+// Delete branch
+$repo->deleteBranch($newBranch);
+
 // List Tags
 $tags = $repo->getTags();
 $tags = $repo->getTags($existingCommit); // Get only tags reachable on this commit.
@@ -75,6 +78,9 @@ $commit = $newTag->getCommit();
 $commitAuthor = $newTag->getCommit()->getAuthor();
 $tagAuthor = $newTag->getAuthor();
 
+// Delete a tag
+$repo->deleteTag($newTag);
+
 // Get remotes
 $remotes = $repo->getRemotes();
 $existingRemote = $repo->findRemote("origin");
@@ -85,6 +91,9 @@ $newRemote = $repo->addRemote(new Git\Remote(
     "alt-origin",
     "git@github.com:vanilla/vanilla-cloud.git"
 ))
+
+// Remote a remote
+$repo->removeRemote($newRemote);
 
 // Pull a branch from a remote.
 // Git itself often uses the remote branch name as your local name automatically.
@@ -98,12 +107,12 @@ $branch = $repo->createBranchFromRemote(
 // Push to a remote.
 $repo->pushBranch($branch, $existingRemote);
 
+// Delete branch locally and on remote.
+$repo->deleteBranch($branch, true);
+
 // Still TODO. Not implemented yet.
 $repo->restoreFiles(["/dir1", "/dir2", "file1"], $branch);
 $repo->stageFiles(["/dir1", "/dir2", "file1"]);
 $repo->unstageFiles(["/dir1", "/dir2", "file1"]);
-$repo->deleteBranch($branch, Branch::DELETE_LOCAL | Branch::PUSH_DELETE);
-$repo->deleteTag($tag, Tag::DELETE_LOCAL | Tag::PUSH_DELETE);
-$repo->removeRemote($remote);
 $repo->getFilesystem();
 ```

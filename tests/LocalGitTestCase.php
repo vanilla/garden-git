@@ -10,7 +10,9 @@ namespace Garden\Git\Tests;
 use Garden\Git;
 use Garden\Git\Tag;
 use Garden\Git\Tests\Fixtures\TestGitDirectory;
+use Garden\Git\Tests\Fixtures\TestGitRepository;
 use PHPUnit\Framework\TestCase;
+
 
 /**
  * Test case for working with one of 2 git directories.
@@ -20,13 +22,13 @@ class LocalGitTestCase extends TestCase {
     /** @var TestGitDirectory */
     protected static $dir1;
 
-    /** @var Git\Repository */
+    /** @var TestGitRepository */
     protected static $repo1;
 
     /** @var TestGitDirectory */
     protected static $dir2;
 
-    /** @var Git\Repository */
+    /** @var TestGitRepository */
     protected static $repo2;
 
     /**
@@ -50,9 +52,9 @@ class LocalGitTestCase extends TestCase {
     }
 
     /**
-     * @return Git\Repository
+     * @return TestGitRepository
      */
-    protected function repo(): Git\Repository {
+    protected function repo(): TestGitRepository {
         return self::$repo1;
     }
 
@@ -64,9 +66,9 @@ class LocalGitTestCase extends TestCase {
     }
 
     /**
-     * @return Git\Repository
+     * @return TestGitRepository
      */
-    protected function repo2(): Git\Repository {
+    protected function repo2(): TestGitRepository {
         return self::$repo2;
     }
 

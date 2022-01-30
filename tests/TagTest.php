@@ -128,8 +128,6 @@ class TagTest extends LocalGitTestCase {
 
     /**
      * Test that we can use a tag as a commitish and branch from it.
-     *
-     * @return void
      */
     public function testBranchFromTag() {
         $this->dir()->touchFile("file1");
@@ -137,5 +135,17 @@ class TagTest extends LocalGitTestCase {
         $tag = $this->repo()->tagCommit($commit, "my-tag");
         $branch = $this->repo()->createBranch("tagged-branch", $tag);
         $this->assertEquals($commit->getCommitHash(), $branch->getCommitHash());
+    }
+
+    /**
+     * Test tag deletion.
+     */
+    public function testDeleteTag() {
+        $this->dir()->touchFile("file1");
+        $commit = $this->dir()->addAndCommitAll("commit1");
+        $tag = $this->repo()->tagCommit($commit, "my-tag");
+        $this->assertCount(1, $this->repo()->getTags());
+        $this->repo()->deleteTag($tag);
+        $this->assertCount(0, $this->repo()->getTags());
     }
 }

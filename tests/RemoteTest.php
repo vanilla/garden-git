@@ -25,7 +25,7 @@ class RemoteTest extends LocalGitTestCase {
         $dir2Commit = $this->dir2()->addAndCommitAll('repo2');
         $this->repo2()->createBranch('repo2-branch', $dir2Commit);
 
-        $remote = $this->repo()->addRemote(new Git\Remote('repo2', $this->repo2()->absolutePath()));
+        $remote = $this->repo()->addRemote($this->repo2()->asRemote('repo2'));
         $this->assertEquals('repo2', $remote->getName());
         $this->assertEquals($this->repo2()->absolutePath(), $remote->getUri());
         $this->assertTrue($remote->canFetch());
@@ -128,8 +128,15 @@ class RemoteTest extends LocalGitTestCase {
         $this->repo()->getRemote('bad-remote');
     }
 
-    public function tryFetchPushOnlyRemote() {
-        $remote = $this->repo()->addRemote(new Git\Remote('repo2', $this->repo2()->absolutePath()));
-
+    /**
+     * Test that remotes can be removed.
+     */
+    public function testRemoveRemote() {
+        $remote = $this->repo()->addRemote($this->repo2()->asRemote('repo2'));
+        $this->assertCount(1, $this->repo()->getRemotes());
+        $this->repo()->removeRemote(
+            $this->repo()->getRemote('repo2')
+        );
+        $this->assertCount(0, $this->repo()->getRemotes());
     }
 }

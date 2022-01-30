@@ -8,6 +8,7 @@
 namespace Garden\Git\Tests\Fixtures;
 
 use Garden\Git\Exception\GitException;
+use Garden\Git\Remote;
 use Garden\Git\Repository;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
@@ -73,5 +74,19 @@ class TestGitRepository extends Repository {
         }
 
         return $message;
+    }
+
+    /**
+     * Get the repo as a remote for another repo.
+     *
+     * @param string $remoteName
+     *
+     * @return Remote
+     */
+    public function asRemote(string $remoteName): Remote {
+        return new Remote(
+            $remoteName,
+            $this->dir
+        );
     }
 }
