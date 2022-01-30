@@ -98,6 +98,29 @@ class RemoteTest extends LocalGitTestCase {
     }
 
     /**
+     * @depends testCheckoutBranchFromRemote
+     */
+    public function testDeletionOfBranchFromRemote() {
+        // Make sure we not on the branch being deleted.
+        $this->repo()->switchBranch($this->repo()->getBranch('master'));
+        $this->repo2()->switchBranch($this->repo2()->getBranch('master'));
+
+        // Check counts before.
+        $this->assertCount(3, $this->repo()->getBranches());
+        $this->assertCount(2, $this->repo2()->getBranches());
+
+        // Delete the branch.
+        $this->repo()->deleteBranch(
+            $this->repo()->getBranch('repo2-branch-copied'),
+            true
+        );
+
+        // 1 less branch after .
+        $this->assertCount(2, $this->repo()->getBranches());
+        $this->assertCount(1, $this->repo2()->getBranches());
+    }
+
+    /**
      * Test the branch not found exception.
      */
     public function testRemoteNotFound() {

@@ -392,6 +392,34 @@ class Repository {
     }
 
     /**
+     * Delete a branch.
+     *
+     * @param Branch $branch The branch to delete.
+     * @param bool $pushDeleteToRemote If true, also delete the branch on its configured remote.
+     * @throws GitException
+     */
+    public function deleteBranch(Branch $branch, bool $pushDeleteToRemote = false): void {
+        $currentBranch = $this->currentBranch();
+        if ($currentBranch->getName() === $branch->getName()) {
+            throw new GitException('Cannot delete the checked out branch: ' . $branch->getName());
+        }
+        $this->git([
+            'branch',
+            '--delete',
+            $branch->getName(),
+        ]);
+
+        if ($pushDeleteToRemote && $branch->getRemoteName() !== null && $branch->getRemoteBranchName() !== null) {
+            $this->git([
+                'push',
+                $branch->getRemoteName(),
+                '--delete',
+                $branch->getRemoteBranchName(),
+            ]);
+        }
+    }
+
+    /**
      * Create a branch from a remote.
      *
      * @param string|PartialBranch $branch The name of the new local branch.

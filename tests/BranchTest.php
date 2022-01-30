@@ -120,6 +120,27 @@ class BranchTest extends LocalGitTestCase {
     }
 
     /**
+     * Test deletion of a branch.
+     */
+    public function testDeleteBranch() {
+        $this->dir()->touchFile('file');
+        $commit = $this->dir()->addAndCommitAll('init');
+        $branch = $this->repo()->createBranch("my-branch", $commit);
+        $masterBranch = $this->repo()->getBranch('master');
+        $this->assertBranches([$masterBranch, $branch]);
+        $this->repo()->deleteBranch($branch, false);
+        $this->assertBranches([$masterBranch]);
+    }
+
+    /**
+     * @depends testDeleteBranch
+     */
+    public function testDeleteCheckedOutBranch() {
+        $this->expectExceptionMessage('Cannot delete the checked out branch');
+        $this->repo()->deleteBranch($this->repo()->currentBranch());
+    }
+
+    /**
      * @return array[]
      */
     public function provideParseErrors(): array {
