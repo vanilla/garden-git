@@ -8,11 +8,12 @@
 namespace Garden\Git\Tests;
 
 use Garden\Git;
+use Garden\Git\Tests\Fixtures\GitTestCase;
 
 /**
  * Tests of git remotes.
  */
-class RemoteTest extends LocalGitTestCase {
+class RemoteTest extends GitTestCase {
 
     /**
      * Test adding a remote.

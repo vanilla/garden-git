@@ -5,6 +5,10 @@
  * @license MIT
  */
 
-namespace Garden\Git\Status;
+namespace Garden\Git\File;
 
-class AddedFile extends AbstractFile {}
+/**
+ * Represents a modified file.
+ */
+class ModifiedFile extends AbstractFile {
+}

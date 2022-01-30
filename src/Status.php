@@ -5,7 +5,14 @@
  * @license MIT
  */
 
-namespace Garden\Git\Status;
+namespace Garden\Git;
+
+use Garden\Git\File\AbstractFile;
+use Garden\Git\File\AddedFile;
+use Garden\Git\File\DeletedFile;
+use Garden\Git\File\IgnoredFile;
+use Garden\Git\File\ModifiedFile;
+use Garden\Git\File\RenamedFile;
 
 /**
  * Used to parse a git status into a class based data structure.
@@ -13,13 +20,17 @@ namespace Garden\Git\Status;
  * Notable limitations:
  * - Files with 2 different staged/unstaged statuses will only have their staged status reflected.
  */
-class RepositoryStatus {
+class Status {
 
     private const CHAR_ADDED = "A";
     private const CHAR_ADD_UNSTAGED = "?";
+    private const CHAR_IGNORED = "!";
     private const CHAR_MODIFIED = "M";
     private const CHAR_DELETED = "D";
     private const CHAR_RENAMED = "R";
+
+    /** @var string */
+    private $statusText;
 
     /** @var AddedFile[] */
     private $added = [];
@@ -33,12 +44,16 @@ class RepositoryStatus {
     /** @var ModifiedFile[] */
     private $modified = [];
 
+    /** @var IgnoredFile[] */
+    private $ignored = [];
+
     /**
      * Constructor.
      *
      * @param string $gitStatusOutput A string that is the output of `git status --porcelain`.
      */
     public function __construct(string $gitStatusOutput) {
+        $this->statusText = $gitStatusOutput;
         $statusLines = array_filter(explode("\n", $gitStatusOutput));
         foreach ($statusLines as $statusLine) {
             $this->applyStatusLine($statusLine);
@@ -55,14 +70,7 @@ class RepositoryStatus {
      * @return bool
      */
     public function hasUnstagedChanges(): bool {
-        return $this->hasAnyChanges([
-            $this->added,
-            $this->deleted,
-            $this->renamed,
-            $this->modified,
-        ], function (AbstractFile $file) {
-            return $file->hasUnstaged();
-        });
+        return count($this->getUnstagedFiles()) > 0;
     }
 
     /**
@@ -71,21 +79,49 @@ class RepositoryStatus {
      * @return bool
      */
     public function hasChanges(): bool {
-        return $this->hasAnyChanges([
-            $this->added,
-            $this->deleted,
-            $this->renamed,
-            $this->modified,
-        ]);
+        return count($this->getFiles()) > 0;
     }
 
     /**
-     * Get all of the statuses files.
+     * Get all the status files except the ignored files.
      *
      * @return AbstractFile[]
      */
     public function getFiles(): array {
         return array_merge($this->added, $this->deleted, $this->renamed, $this->modified);
+    }
+
+    /**
+     * Get all the status files that have staged changes except the ignored files.
+     *
+     * @return AbstractFile[]
+     */
+    public function getStagedFiles(): array {
+        $files = $this->getFiles();
+        $stagedFiles = [];
+        foreach ($files as $file) {
+            if ($file->hasStaged()) {
+                $stagedFiles[] = $file;
+            }
+        }
+        return $stagedFiles;
+    }
+
+
+    /**
+     * Get all the status files that have unstaged changes except the ignored files.
+     *
+     * @return AbstractFile[]
+     */
+    public function getUnstagedFiles(): array {
+        $files = $this->getFiles();
+        $stagedFiles = [];
+        foreach ($files as $file) {
+            if ($file->hasUnstaged()) {
+                $stagedFiles[] = $file;
+            }
+        }
+        return $stagedFiles;
     }
 
     /**
@@ -116,32 +152,23 @@ class RepositoryStatus {
         return $this->modified;
     }
 
+    /**
+     * @return IgnoredFile[]
+     */
+    public function getIgnored(): array {
+        return $this->ignored;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusText(): string {
+        return $this->statusText;
+    }
 
     ///
     /// Private utilities
     ///
-
-    /**
-     * Check if one of a few sets of files has any changes.
-     *
-     * @param AbstractFile[][] $fileSets Sets of files.
-     * @param callable|null $filter Optionally filter each fileset.
-     *
-     * @return bool
-     */
-    private function hasAnyChanges(array $fileSets, callable $filter = null): bool {
-        foreach ($fileSets as $fileSet) {
-            if ($filter) {
-                $fileSet = array_filter($fileSet, $filter);
-            }
-
-            if (count($fileSet) > 0) {
-                return true;
-            }
-        }
-
-        return false;
-    }
 
     /**
      * @param string $statusLine
@@ -168,6 +195,9 @@ class RepositoryStatus {
                 break;
             case self::CHAR_MODIFIED:
                 $this->modified[] = new ModifiedFile($filePath, $hasStaged, $hasUnstaged);
+                break;
+            case self::CHAR_IGNORED:
+                $this->ignored[] = new IgnoredFile($filePath);
                 break;
             case self::CHAR_RENAMED:
                 // Our path is actually 2 pieces.

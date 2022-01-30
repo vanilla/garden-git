@@ -5,8 +5,11 @@
  * @license MIT
  */
 
-namespace Garden\Git\Status;
+namespace Garden\Git\File;
 
+/**
+ * Represents a renamed file.
+ */
 class RenamedFile extends AbstractFile {
 
     /** @var string */

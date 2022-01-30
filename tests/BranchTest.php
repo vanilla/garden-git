@@ -8,11 +8,12 @@
 namespace Garden\Git\Tests;
 
 use Garden\Git;
+use Garden\Git\Tests\Fixtures\GitTestCase;
 
 /**
  * Tests for branches.
  */
-class BranchTest extends LocalGitTestCase {
+class BranchTest extends GitTestCase {
 
     /**
      * Test that we can get our default branch.

@@ -9,13 +9,14 @@ namespace Garden\Git\Tests;
 
 use Garden\Git\Exception\GitException;
 use Garden\Git\Repository;
+use Garden\Git\Tests\Fixtures\GitTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
 
 /**
  * Tests for the repository class.
  */
-class RepositoryTest extends LocalGitTestCase {
+class RepositoryTest extends GitTestCase {
 
     /**
      * Make sure we validate directories exist.

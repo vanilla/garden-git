@@ -5,6 +5,9 @@
  * @license MIT
  */
 
-namespace Garden\Git\Status;
+namespace Garden\Git\File;
 
-class DeletedFile extends AbstractFile {}
+/**
+ * Represents a file in
+ */
+class AddedFile extends AbstractFile {}

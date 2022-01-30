@@ -41,6 +41,13 @@ class TestGitDirectory {
     }
 
     /**
+     * @return Filesystem
+     */
+    public function getFs(): Filesystem {
+        return $this->fs;
+    }
+
+    /**
      * Get the primary author we are using.
      *
      * @return Git\Author
@@ -105,6 +112,57 @@ class TestGitDirectory {
         $filePath = Path::join($this->cwd, $path);
         $this->fs->touch($filePath);
         return $filePath;
+    }
+
+    /**
+     * Remove a file.
+     *
+     * @param string $path
+     */
+    public function removeFile(string $path): void {
+        $filePath = Path::join($this->cwd, $path);
+        $this->fs->remove($filePath);
+    }
+
+    /**
+     * Create a directory structure based on nested arrays.
+     *
+     * @param array $structure
+     * @example
+     * [
+     *    'dir1' => [
+     *        'nested' => [
+     *             'file1',
+     *        ],
+     *        'file2',
+     *        'file3',
+     *    ],
+     *    'file4',
+     * ]
+     * @param string $basePath Used for recursion.
+     *
+     * @return string[] The file paths created.
+     */
+    public function touchDirStructure(array $structure, string $basePath = ''): array {
+        $createdPaths = [];
+        foreach ($structure as $key => $value) {
+            if (is_array($value)) {
+                $dirPath = Path::join($basePath, $key);
+                $this->fs->mkdir(Path::join($this->cwd, $dirPath));
+                $recursivePaths = $this->touchDirStructure($value, $dirPath);
+                $createdPaths = array_merge($createdPaths, $recursivePaths);
+            } else {
+                $filePath = Path::join($basePath, $value);
+                $createdPaths[] = $filePath;
+                $realPath = Path::join($this->getCwd(), $filePath);
+                $fileAlreadyExists = $this->fs->exists($realPath);
+                $this->fs->touch($realPath);
+                if (!$fileAlreadyExists) {
+                    $this->fs->appendToFile($realPath, random_int(0, 99999999));
+                }
+            }
+        }
+        return $createdPaths;
     }
 
     /**

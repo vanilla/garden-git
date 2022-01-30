@@ -7,6 +7,12 @@ An object-oriented PHP library for working Git.
 [![CircleCI](https://circleci.com/gh/vanilla/garden-git/tree/master.svg?style=svg)](https://circleci.com/gh/vanilla/garden-git/tree/master)
 [![codecov](https://codecov.io/gh/vanilla/garden-git/branch/master/graph/badge.svg?token=z1AGuq5H7w)](https://codecov.io/gh/vanilla/garden-git)
 
+## Installation
+
+```shell
+composer require vanillaforums/garden-git
+```
+
 ## Project Goals
 
 -   Present a tested subset of `git` with object-oriented abstractions.
@@ -110,9 +116,13 @@ $repo->pushBranch($branch, $existingRemote);
 // Delete branch locally and on remote.
 $repo->deleteBranch($branch, true);
 
-// Still TODO. Not implemented yet.
-$repo->restoreFiles(["/dir1", "/dir2", "file1"], $branch);
+// Staging files.
 $repo->stageFiles(["/dir1", "/dir2", "file1"]);
 $repo->unstageFiles(["/dir1", "/dir2", "file1"]);
-$repo->getFilesystem();
+
+// Copy files from another branch.
+$repo->restoreFiles(["/dir1", "/dir2", "file1"], $branch);
+
+// Clear out all uncommitted file changes.
+$repo->resetFiles();
 ```

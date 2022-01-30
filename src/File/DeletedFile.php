@@ -5,7 +5,9 @@
  * @license MIT
  */
 
-namespace Garden\Git\Status;
+namespace Garden\Git\File;
 
-class ModifiedFile extends AbstractFile {
-}
+/**
+ * Represents a deleted file.
+ */
+class DeletedFile extends AbstractFile {}

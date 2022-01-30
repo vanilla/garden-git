@@ -5,19 +5,17 @@
  * @license MIT
  */
 
-namespace Garden\Git\Tests;
+namespace Garden\Git\Tests\Fixtures;
 
 use Garden\Git;
 use Garden\Git\Tag;
-use Garden\Git\Tests\Fixtures\TestGitDirectory;
-use Garden\Git\Tests\Fixtures\TestGitRepository;
 use PHPUnit\Framework\TestCase;
 
 
 /**
  * Test case for working with one of 2 git directories.
  */
-class LocalGitTestCase extends TestCase {
+class GitTestCase extends TestCase {
 
     /** @var TestGitDirectory */
     protected static $dir1;

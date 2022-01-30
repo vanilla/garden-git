@@ -9,7 +9,6 @@ namespace Garden\Git;
 
 use Garden\Git\Exception\GitException;
 use Garden\Git\Exception\NotFoundException;
-use Garden\Git\Status\RepositoryStatus;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -88,13 +87,13 @@ class Repository {
     /**
      * Get the structured status of a repository.
      *
-     * @return RepositoryStatus The status.
+     * @return Status The status.
      *
      * @throws GitException If the command did not execute successfully.
      */
-    public function getStatus(): RepositoryStatus {
-        $result = $this->git(["status", "--porcelain"]);
-        $status = new RepositoryStatus($result);
+    public function getStatus(): Status {
+        $result = $this->git(["status", "--porcelain", "--ignored"]);
+        $status = new Status($result);
         return $status;
     }
 
@@ -176,6 +175,119 @@ class Repository {
         }
         return $tags;
     }
+
+    ///
+    /// Staging
+    ///
+
+
+    /**
+     * Stage files into the git staging areas.
+     *
+     * @param string[] $paths An array of git file patterns. Use [.] For all files.
+     *
+     * @return Status
+     *
+     * @throws GitException
+     */
+    public function stageFiles(array $paths = ['.']): Status {
+        $this->git(array_merge(
+            ['add', '--'],
+            $paths
+        ));
+
+        return $this->getStatus();
+    }
+
+    /**
+     * Unstage files from the git staging area.
+     *
+     * @param string[] $paths An array of git file patterns. Use [.] For all files.
+     *
+     * @return Status
+     *
+     * @throws GitException
+     */
+    public function unstageFiles(array $paths): Status {
+        $this->git(array_merge(
+            ['reset', '--'],
+            $paths
+        ));
+
+        return $this->getStatus();
+    }
+
+    /**
+     * Clear staged and unstaged stages so the repo state matches HEAD.
+     *
+     * @return Status
+     *
+     * @throws GitException
+     */
+    public function resetFiles(): Status {
+        $this->stageFiles();
+        $this->git([
+            "reset",
+            "--hard",
+        ]);
+        return $this->getStatus();
+    }
+
+    /**
+     * Restore paths from a particular commit or branch.
+     *
+     * - Files not present in that branch will be deleted.
+     * - Only files in directories matching $paths will be restored.
+     *
+     * @param string[] $paths An array of git file patterns. Use [.] For all files.
+     * @param CommitishInterace $commitish
+     *
+     * @return Status
+     * @throws GitException
+     */
+    public function restoreFiles(array $paths, CommitishInterace $commitish): Status {
+        $statusBefore = $this->getStatus();
+        if ($statusBefore->hasChanges()) {
+            throw new GitException('Cannot restore when their are uncommitted changes.');
+        }
+        $this->git(array_merge(
+            [
+                '-c', 'core.ignorecase=true',
+                'checkout',
+                '--no-overlay',
+                $commitish->getCommitish(),
+                '--',
+            ],
+            $paths
+        ));
+
+        // If there are case-sensitively renamed files on a renamed file system
+        // They get really screwed up if we don't do this.
+        // Here's an example out of doing the previous command and selecting
+        // A case-sensitively renamed file on macos.
+
+        // On branch master
+        // Changes to be committed:
+	    //     renamed:    dir1/file4 -> dir1/File4
+        // Changes not staged for commit:
+	    //     deleted:    dir1/File4
+
+        // If we don't do any further steps than the file will be deleted entirely
+        // Even though it was supposed to be renamed.
+        $this->git([
+            '-c', 'core.ignorecase=true',
+            "checkout",
+            '--',
+            '.'
+        ]);
+
+        $this->stageFiles();
+        return $this->getStatus();
+    }
+
+    ///
+    /// Commits
+    ///
 
     /**
      * Commit everything in the working tree.

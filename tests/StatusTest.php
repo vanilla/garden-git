@@ -8,15 +8,16 @@
 namespace Garden\Git\Tests;
 
 use Garden\Git;
-use Garden\Git\Status\AddedFile;
-use Garden\Git\Status\DeletedFile;
-use Garden\Git\Status\ModifiedFile;
-use Garden\Git\Status\RenamedFile;
+use Garden\Git\File\AddedFile;
+use Garden\Git\File\DeletedFile;
+use Garden\Git\File\ModifiedFile;
+use Garden\Git\File\RenamedFile;
+use Garden\Git\Tests\Fixtures\GitTestCase;
 
 /**
  * Tests for fetching statuses.
  */
-class StatusTest extends LocalGitTestCase {
+class StatusTest extends GitTestCase {
 
     /**
      * Test actual statuses on a real repo.
@@ -31,8 +32,8 @@ class StatusTest extends LocalGitTestCase {
         $this->assertEquals(true, $status->hasChanges());
         $this->assertEquals(
             [
-                new Git\Status\AddedFile('test1', true, false),
-                new Git\Status\AddedFile('test2', false, true),
+                new Git\File\AddedFile('test1', true, false),
+                new Git\File\AddedFile('test2', false, true),
             ],
             $status->getAdded()
         );
@@ -44,12 +45,12 @@ class StatusTest extends LocalGitTestCase {
      */
     public function testHasChanges() {
         // No changes.
-        $status = new Git\Status\RepositoryStatus("");
+        $status = new Git\Status("");
         $this->assertEquals(false, $status->hasChanges());
         $this->assertEquals(false, $status->hasUnstagedChanges());
 
         // We add a staged change.
-        $status = new Git\Status\RepositoryStatus("M  myfile.txt");
+        $status = new Git\Status("M  myfile.txt");
         $this->assertEquals(true, $status->hasChanges());
         $this->assertEquals(false, $status->hasUnstagedChanges());
         $this->assertTrue(
@@ -57,7 +58,7 @@ class StatusTest extends LocalGitTestCase {
         );
 
         // We add unstaged changes.
-        $status = new Git\Status\RepositoryStatus(" M myfile.txt");
+        $status = new Git\Status(" M myfile.txt");
         $this->assertEquals(true, $status->hasChanges());
         $this->assertEquals(true, $status->hasUnstagedChanges());
     }
@@ -76,9 +77,11 @@ R  old-name -> new-name
 M  staged/modified.txt
  M unstaged/modified.txt
 MM modified-both.txt
+!! ignored/
 TXT;
 
-        $status = new Git\Status\RepositoryStatus($statusText);
+        $status = new Git\Status($statusText);
+        $this->assertEquals($statusText, $status->getStatusText());
         $this->assertCount(9, $status->getFiles());
         $this->assertEquals([
             new AddedFile("added.txt", true, false),
@@ -98,11 +101,14 @@ TXT;
         $this->assertEquals('old-name', $renamed->getOldPath());
         $this->assertEquals('new-name', $renamed->getPath());
 
-
         $this->assertEquals([
             new ModifiedFile("staged/modified.txt", true, false),
             new ModifiedFile("unstaged/modified.txt", false, true),
             new ModifiedFile("modified-both.txt", true, true),
         ], $status->getModified());
+
+        $this->assertEquals([
+            new Git\File\IgnoredFile("ignored/"),
+        ], $status->getIgnored());
     }
 }

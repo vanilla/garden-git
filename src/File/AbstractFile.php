@@ -5,8 +5,11 @@
  * @license MIT
  */
 
-namespace Garden\Git\Status;
+namespace Garden\Git\File;
 
+/**
+ * Represents a file in a git status.
+ */
 abstract class AbstractFile {
 
     /** @var string */

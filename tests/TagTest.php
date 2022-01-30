@@ -11,11 +11,12 @@ use Garden\Git\Commit;
 use Garden\Git\CommitishInterace;
 use Garden\Git\PartialBranch;
 use Garden\Git\Tag;
+use Garden\Git\Tests\Fixtures\GitTestCase;
 
 /**
  * Tests for fetching and creating tags.
  */
-class TagTest extends LocalGitTestCase {
+class TagTest extends GitTestCase {
 
     /**
      * Test that we can create and list tags.
