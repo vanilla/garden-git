@@ -41,7 +41,10 @@ class Repository {
         $executableFinder = new ExecutableFinder();
         $gitPath = $executableFinder->find('git');
         if ($gitPath === null) {
+            // Since CI always has git installed we don't really have a way to test this.
+            // @codeCoverageIgnoreStart
             throw new GitException("Could not locate a git binary on the system.");
+            // @codeCoverageIgnoreEnd
         }
         $this->gitPath = $gitPath;
         $this->fileSystem = new Filesystem();
@@ -195,7 +198,10 @@ class Repository {
         preg_match('/\s([^)]*)]/', $result, $m);
         $hash = $m[1] ?? null;
         if (empty($hash)) {
+            // This codepath really exists in case we are incompatible with some future git output format.
+            // @codeCoverageIgnoreStart
             throw new GitException("Could not find commit-hash in commit result:\n" . $result);
+            // @codeCoverageIgnoreEnd
         }
 
         $commit = $this->getCommit($hash);
@@ -306,9 +312,6 @@ class Repository {
     public function fetchFromRemote(Remote $remote): void {
         // Make sure the remote still exists.
         $remote = $this->getRemote($remote->getName());
-        if (!$remote->canFetch()) {
-            throw new GitException("Fetch is not configured for remote {$remote->getName()}");
-        }
 
         $this->git(['fetch', $remote->getName()]);
     }

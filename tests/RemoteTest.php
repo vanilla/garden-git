@@ -104,4 +104,9 @@ class RemoteTest extends LocalGitTestCase {
         $this->expectExceptionMessage('Remote Not Found: \'bad-remote\'');
         $this->repo()->getRemote('bad-remote');
     }
+
+    public function tryFetchPushOnlyRemote() {
+        $remote = $this->repo()->addRemote(new Git\Remote('repo2', $this->repo2()->absolutePath()));
+
+    }
 }

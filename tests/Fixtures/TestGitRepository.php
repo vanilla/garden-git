@@ -7,7 +7,9 @@
 
 namespace Garden\Git\Tests\Fixtures;
 
+use Garden\Git\Exception\GitException;
 use Garden\Git\Repository;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 /**
  * Fixture for test git repositories.
@@ -33,8 +35,17 @@ class TestGitRepository extends Repository {
     public function git(array $args): string {
         self::$lastUsedInstance = $this;
         $this->lastGitCommand = implode(' ', $args);
-        $output = parent::git($args);
-        $this->lastGitOutput = $output;
+        try {
+            $output = parent::git($args);
+            $this->lastGitOutput = $output;
+        } catch (GitException $e) {
+            $previous = $e->getPrevious();
+            if ($previous instanceof ProcessFailedException) {
+                $this->lastGitOutput = $previous->getProcess()->getOutput();
+            }
+            throw $e;
+        }
+
         return $output;
     }
 

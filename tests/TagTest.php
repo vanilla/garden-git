@@ -7,6 +7,7 @@
 
 namespace Garden\Git\Tests;
 
+use Garden\Git\Commit;
 use Garden\Git\CommitishInterace;
 use Garden\Git\PartialBranch;
 use Garden\Git\Tag;
@@ -19,7 +20,7 @@ class TagTest extends LocalGitTestCase {
     /**
      * Test that we can create and list tags.
      *
-     * @return \Garden\Git\PartialCommit
+     * @return Commit
      */
     public function testCreateAndListTags() {
         $this->dir()->touchFile("README.md");

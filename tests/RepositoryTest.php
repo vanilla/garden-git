@@ -7,6 +7,7 @@
 
 namespace Garden\Git\Tests;
 
+use Garden\Git\Exception\GitException;
 use Garden\Git\Repository;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
@@ -32,6 +33,14 @@ class RepositoryTest extends LocalGitTestCase {
         $tempdir = $this->createTempDir();
         $this->expectExceptionMessage("Git Root Not Found");
         new Repository($tempdir);
+    }
+
+    /**
+     * Coverage for getCommit() rethrow parent exception codepath.
+     */
+    public function testGetGetCommitEmpty() {
+        $this->expectException(GitException::class);
+        $this->repo()->getCommit("--not-an-arg-not-a-commit");
     }
 
     /**
