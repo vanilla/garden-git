@@ -10,25 +10,28 @@ An object-oriented PHP library for working Git.
 ## Installation
 
 ```shell
-composer require vanillaforums/garden-git
+composer require vanilla/garden-git
 ```
 
-## Project Goals
+## Features
 
--   Present a tested subset of `git` with object-oriented abstractions.
--   Remove magic from most git actions.
-
-    Many built in git commands have multiple ways to call them.
-    This library will make most "implicit" arguments on the command line required.
-
--   Have stable and consistent output.
+- Ability to call arbitrary git commands with nicely wrapped process output.
+- Object-oriented wrappers around common git operations.
+  - Branches
+  - Commits
+  - Remotes
+  - Tags
+  - Authors
+  - File staging and restoration.
+- PHPUnit test harness w/ 100% test coverage.
 
 ## Usage
 
 **Common Patterns**
 
--   `find` methods return null if an item is not found.
--   `get` methods throw if an item is not found.
+- All methods may throw a `Garden\Git\Exception\GitException` if there is a problem.
+- `find` methods return null if an item is not found.
+- `get` methods throw if a `Garden\Git\Exception\NotFoundException` item is not found.
 
 ```php
 use Garden\Git;
@@ -36,7 +39,10 @@ use Garden\Git;
 // Will throw if path isn't the root of a git repo.
 $repo = new Git\Repository('/path/to/repo');
 
-//
+// Run any git command.
+// Will throw a `GitException` with the failed process output
+// if git returns a non-0 exit code.
+$repo->git(['rebase', 'master'])
 
 // Commits
 $newCommit = $repo->commit("Commit")
