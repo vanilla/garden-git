@@ -41,6 +41,12 @@ class StagingTest extends GitTestCase {
         $status = $this->repo()->stageFiles();
         $this->assertCount(3, $status->getStagedFiles());
         $this->assertCount(0, $status->getUnstagedFiles());
+
+        $status = $this->repo()->resetFiles();
+        $this->assertCount(0, $status->getFiles());
+        $this->dir()->assertFileNotExists('dir1/file1');
+        $this->dir()->assertFileNotExists('dir1/file2');
+        $this->dir()->assertFileNotExists('file3');
     }
 
     /**
