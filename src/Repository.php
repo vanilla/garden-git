@@ -642,7 +642,7 @@ class Repository {
      * @throws GitException
      * @throws NotFoundException
      */
-    public function createBranchFromRemote($branch, Remote $remote, string $remoteBranchName): Branch {
+    public function createBranchFromRemote(PartialBranch $branch, Remote $remote, string $remoteBranchName): Branch {
         $existingBranch = $this->findBranch($branch);
         if ($existingBranch) {
             throw new GitException("Branch already exists: {$branch->getName()}");
