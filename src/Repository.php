@@ -99,7 +99,7 @@ class Repository {
         $process->setTimeout(null);
         $process->setIdleTimeout(null);
         $process->start();
-        yield from $process->getIterator(Process::ITER_SKIP_ERR);
+        yield from $process->getIterator();
 
         if (!$process->isSuccessful()) {
             throw new GitException($process->getErrorOutput(), 500);
@@ -496,7 +496,7 @@ class Repository {
      * @throws GitException
      */
     public function fetchFromRemoteIterator(Remote $remote): \Generator {
-        return $this->gitIterator(['fetch', $remote->getName()]);
+        return $this->gitIterator(['fetch', $remote->getName(), '--progress']);
     }
 
     /**
