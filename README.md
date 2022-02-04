@@ -132,6 +132,13 @@ $newRemote = $repo->addRemote(new Git\Remote(
     "git@github.com:vanilla/vanilla-cloud.git"
 ))
 
+// Fetch data from the remote.
+// You'll likely want to run this after creating a remote.
+$repo->fetchFromRemote($newRemote);
+foreach ($repo->fetchFromRemoteIterator($remote) as $gitOutputLine) {
+    // Allows you to render some progress during the fetch. 
+}
+
 // Remote a remote
 $repo->removeRemote($newRemote);
 

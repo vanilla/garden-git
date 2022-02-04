@@ -27,6 +27,7 @@ class RemoteTest extends GitTestCase {
         $this->repo2()->createBranch('repo2-branch', $dir2Commit);
 
         $remote = $this->repo()->addRemote($this->repo2()->asRemote('repo2'));
+        $this->repo()->fetchFromRemote($remote);
         $this->assertEquals('repo2', $remote->getName());
         $this->assertEquals($this->repo2()->absolutePath(), $remote->getUri());
         $this->assertTrue($remote->canFetch());

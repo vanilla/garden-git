@@ -74,6 +74,7 @@ class Repository {
      */
     public function git(array $args): string {
         $process = new Process(array_merge([$this->gitPath], $args), $this->dir);
+        $process->setTimeout(null);
         try {
             $process->mustRun();
         } catch (ProcessFailedException $e) {
@@ -82,6 +83,29 @@ class Repository {
 
         $output = $process->getOutput();
         return $output;
+    }
+
+    /**
+     * Run an arbitrary git command within the repository.
+     *
+     * @param string[] $args The git subcommand and arguments.
+     *
+     * @return \Generator A generator the returns the successful output of the command.
+     *
+     * @throws GitException If the command did not execute successfully.
+     */
+    public function gitIterator(array $args): \Generator {
+        $process = new Process(array_merge([$this->gitPath], $args), $this->dir);
+        $process->setTimeout(null);
+        $process->setIdleTimeout(null);
+        $process->start();
+        yield from $process->getIterator(Process::ITER_SKIP_ERR);
+
+        if (!$process->isSuccessful()) {
+            throw new GitException($process->getErrorOutput(), 500);
+        }
+
+        return $process->getOutput();
     }
 
     /**
@@ -457,7 +481,22 @@ class Repository {
      * @throws GitException
      */
     public function fetchFromRemote(Remote $remote): void {
-        $this->git(['fetch', $remote->getName()]);
+        foreach ($this->fetchFromRemoteIterator($remote) as $_) {
+            // Not doing anything with the output here.
+        }
+    }
+
+    /**
+     * Fetch everything from a remote in an iterator.
+     *
+     * @param Remote $remote
+     *
+     * @return \Generator
+     *
+     * @throws GitException
+     */
+    public function fetchFromRemoteIterator(Remote $remote): \Generator {
+        return $this->gitIterator(['fetch', $remote->getName()]);
     }
 
     /**
@@ -478,9 +517,6 @@ class Repository {
         $this->git(["remote", "add", $remote->getName(), $remote->getUri()]);
 
         $newRemote = $this->getRemote($remote->getName());
-        if ($newRemote->canFetch()) {
-            $this->fetchFromRemote($newRemote);
-        }
         return $newRemote;
     }
 
