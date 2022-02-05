@@ -42,9 +42,14 @@ jobs:
     docker:
       - image: cimg/php:7.4
     steps: *php-test-steps
+  php-tests-8:
+    docker:
+      - image: cimg/php:8.0
+    steps: *php-test-steps
 workflows:
   version: 2
   commit:
     jobs:
+      - php-tests-8
       - php-tests-74
       - php-tests-72
