@@ -45,6 +45,15 @@ class RepositoryTest extends GitTestCase {
     }
 
     /**
+     * Test a failure of the gitIterator() method.
+     */
+    public function testFailingGitIterator() {
+        $this->expectExceptionMessage("'not-a-command' is not a git command");
+        $generator = $this->repo()->gitIterator(["not-a-command"]);
+        foreach ($generator as $_) {}
+    }
+
+    /**
      * Create a temporary directory.
      *
      * @return string

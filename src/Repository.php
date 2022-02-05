@@ -99,10 +99,10 @@ class Repository {
         $process->setTimeout(null);
         $process->setIdleTimeout(null);
         $process->start();
-        yield from $process->getIterator();
+        yield from $process->getIterator(Process::ITER_KEEP_OUTPUT);
 
         if (!$process->isSuccessful()) {
-            throw new GitException($process->getErrorOutput(), 500);
+            throw new GitException($process->getErrorOutput(), 500, new ProcessFailedException($process));
         }
 
         return $process->getOutput();

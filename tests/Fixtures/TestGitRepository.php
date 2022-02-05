@@ -50,6 +50,25 @@ class TestGitRepository extends Repository {
         return $output;
     }
 
+
+    /**
+     * Track some extra data while running.
+     *
+     * @param array $args
+     *
+     * @return \Generator
+     */
+    public function gitIterator(array $args): \Generator {
+        self::$lastUsedInstance = $this;
+        $this->lastGitCommand = implode(' ', $args);
+        $generator = parent::gitIterator($args);
+        yield from $generator;
+        $output = $generator->getReturn();
+        $this->lastGitOutput = $generator->getReturn();
+
+        return $output;
+    }
+
     /**
      * Get extra info for debugging in exceptions.
      *
