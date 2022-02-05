@@ -186,3 +186,25 @@ $status = $repo->restoreFiles(["/dir1", "/dir2", "file1"], $branch);
 // Clear out all uncommitted file changes.
 $status =$repo->resetFiles();
 ```
+
+## Contributing
+
+Think there's a key feature missing? Pull requests will be accepted if they pass CI and they have full code coverage.
+
+**Setting up the Repo**
+
+```shell
+composer install
+```
+
+**Running Tests**
+
+```shell
+composer tests
+
+# Run and generate code coverage
+composer tests:coverage
+```
+
+- They pass the CI tests.
+- They come with full test coverage. 
