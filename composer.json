@@ -23,7 +23,7 @@
         "php": ">=7.2",
         "vanilla/garden-http": "^2.4",
         "symfony/filesystem": "^5.4",
-        "symfony/process": "^5.4",
+        "symfony/process": "*",
         "vanilla/garden-schema": "^1.13"
     },
     "require-dev": {
