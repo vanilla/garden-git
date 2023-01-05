@@ -208,3 +208,4 @@ composer tests:coverage
 
 - They pass the CI tests.
 - They come with full test coverage. 
+test
