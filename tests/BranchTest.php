@@ -144,7 +144,7 @@ class BranchTest extends GitTestCase {
     /**
      * @return array[]
      */
-    public function provideParseErrors(): array {
+    public static function provideParseErrors(): array {
         return [
             [
                 'some-branch | 42dsf44 | refs/head/other',
