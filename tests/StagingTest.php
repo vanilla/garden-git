@@ -74,7 +74,7 @@ class StagingTest extends GitTestCase {
         ]);
         $this->repo()->stageFiles();
         $commit1 = $this->repo()->commit("Commit 1");
-        $masterBranch = $this->repo()->currentBranch();
+        $mainBranch = $this->repo()->currentBranch();
 
         // Let's make a new branch.
         $branch1 = $this->repo()->createBranch("branch1", $commit1);
@@ -94,8 +94,8 @@ class StagingTest extends GitTestCase {
         $this->repo()->stageFiles();
         $this->repo()->commit("changing files");
 
-        // Now switch back to master and remove the files.
-        $this->repo()->switchBranch($masterBranch);
+        // Now switch back to main and remove the files.
+        $this->repo()->switchBranch($mainBranch);
         // Just part of the path spec.
         $status = $this->repo()->restoreFiles([
             'file1',

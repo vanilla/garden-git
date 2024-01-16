@@ -24,7 +24,7 @@ class BranchTest extends GitTestCase {
         $this->assertBranches([]);
         $this->dir()->touchFile("init");
         $commit = $this->dir()->addAndCommitAll("init");
-        $this->assertBranches([new Git\Branch("master", $commit)]);
+        $this->assertBranches([new Git\Branch("main", $commit)]);
     }
 
     /**
@@ -33,13 +33,13 @@ class BranchTest extends GitTestCase {
     public function testCreateBranch() {
         $this->dir()->touchFile("file1");
         $commit = $this->dir()->addAndCommitAll("Commit 1");
-        $this->repo()->createBranch("my-branch", new Git\PartialBranch("master"));
+        $this->repo()->createBranch("my-branch", new Git\PartialBranch("main"));
         $this->dir()->touchFile("file2");
         $commit2 = $this->dir()->addAndCommitAll("Commit 2");
         $nestedBranch = $this->repo()->createBranch("nested/branch", $commit2);
         $altNestedBranch = $this->repo()->createBranch("nested/alt", $nestedBranch);
         $this->assertBranches([
-            new Git\Branch('master', $commit2),
+            new Git\Branch('main', $commit2),
             new Git\Branch('my-branch', $commit),
             new Git\Branch('nested/branch', $commit2),
             new Git\Branch('nested/alt', $commit2),
@@ -61,23 +61,23 @@ class BranchTest extends GitTestCase {
     public function testSwitchBranch() {
         $this->dir()->touchFile('file1');
         $this->dir()->addAndCommitAll('init');
-        $notMasterBranch = $this->repo()->createBranch('not-master');
-        $this->repo()->switchBranch($notMasterBranch);
-        $this->dir()->touchFile('not-on-master');
-        $this->dir()->addAndCommitAll('off-master');
-        $this->dir()->assertFileExists('not-on-master');
-        // Switch back to master.
-        $this->repo()->switchBranch($this->repo()->getBranch('master'));
-        $this->dir()->assertFileNotExists('not-on-master');
+        $notmainBranch = $this->repo()->createBranch('not-main');
+        $this->repo()->switchBranch($notmainBranch);
+        $this->dir()->touchFile('not-on-main');
+        $this->dir()->addAndCommitAll('off-main');
+        $this->dir()->assertFileExists('not-on-main');
+        // Switch back to main.
+        $this->repo()->switchBranch($this->repo()->getBranch('main'));
+        $this->dir()->assertFileNotExists('not-on-main');
     }
 
     /**
      * @depends testSwitchBranch
      */
     public function testCurrentBranch() {
-        $this->assertEquals('master', $this->repo()->currentBranch()->getName());
-        $this->repo()->switchBranch($this->repo()->getBranch('not-master'));
-        $this->assertEquals('not-master', $this->repo()->currentBranch()->getName());
+        $this->assertEquals('main', $this->repo()->currentBranch()->getName());
+        $this->repo()->switchBranch($this->repo()->getBranch('not-main'));
+        $this->assertEquals('not-main', $this->repo()->currentBranch()->getName());
     }
 
     /**
@@ -127,10 +127,10 @@ class BranchTest extends GitTestCase {
         $this->dir()->touchFile('file');
         $commit = $this->dir()->addAndCommitAll('init');
         $branch = $this->repo()->createBranch("my-branch", $commit);
-        $masterBranch = $this->repo()->getBranch('master');
-        $this->assertBranches([$masterBranch, $branch]);
+        $mainBranch = $this->repo()->getBranch('main');
+        $this->assertBranches([$mainBranch, $branch]);
         $this->repo()->deleteBranch($branch, false);
-        $this->assertBranches([$masterBranch]);
+        $this->assertBranches([$mainBranch]);
     }
 
     /**
@@ -144,7 +144,7 @@ class BranchTest extends GitTestCase {
     /**
      * @return array[]
      */
-    public function provideParseErrors(): array {
+    public static function provideParseErrors(): array {
         return [
             [
                 'some-branch | 42dsf44 | refs/head/other',

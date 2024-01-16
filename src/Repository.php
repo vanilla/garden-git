@@ -290,7 +290,7 @@ class Repository {
         // Here's an example out of doing the previous command and selecting
         // A case-sensitively renamed file on macos.
 
-        // On branch master
+        // On branch main
         // Changes to be committed:
 	    //     renamed:    dir1/file4 -> dir1/File4
         // Changes not staged for commit:
@@ -328,7 +328,7 @@ class Repository {
          * Output ends up looking like this
          *
          * @example
-         * [master (root-commit) 49c28cc] File 5
+         * [main (root-commit) 49c28cc] File 5
          * 1 file changed, 0 insertions(+), 0 deletions(-)
          * create mode 100644 file5
          */
