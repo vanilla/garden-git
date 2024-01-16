@@ -104,8 +104,8 @@ class RemoteTest extends GitTestCase {
      */
     public function testDeletionOfBranchFromRemote() {
         // Make sure we not on the branch being deleted.
-        $this->repo()->switchBranch($this->repo()->getBranch('master'));
-        $this->repo2()->switchBranch($this->repo2()->getBranch('master'));
+        $this->repo()->switchBranch($this->repo()->getBranch('main'));
+        $this->repo2()->switchBranch($this->repo2()->getBranch('main'));
 
         // Check counts before.
         $this->assertCount(3, $this->repo()->getBranches());

@@ -44,7 +44,7 @@ class GitTestCase extends TestCase {
      */
     protected function setUp(): void {
         parent::setUp();
-        if (!$this->hasDependencies()) {
+        if (!$this->hasDependencyInput()) {
             $this->resetRepos();
         }
     }

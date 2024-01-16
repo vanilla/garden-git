@@ -22,9 +22,9 @@ class GitSchema extends Schema {
      * @inheritDoc
      * @throws GitException
      */
-    public function validate($data, $sparse = false) {
+    public function validate($data, $options = []) {
         try {
-            return parent::validate($data, $sparse);
+            return parent::validate($data, $options);
         } catch (ValidationException $exception) {
             throw new GitException($exception->getMessage(), 422, $exception);
         }

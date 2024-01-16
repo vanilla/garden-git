@@ -28,15 +28,15 @@ class TagTest extends GitTestCase {
         $firstCommit = $this->dir()->addAndCommitAll("Add README");
         $this->repo()->tagCommit($firstCommit, "readme-tag", "First tag");
 
-        $this->assertInitialMasterTag();
+        $this->assertInitialmainTag();
         return $firstCommit;
     }
 
     /**
      * Assert that the initial tags from testCreateAndListTags() are still present on its commit.
      */
-    private function assertInitialMasterTag() {
-        $tags = $this->repo()->getTags(new PartialBranch("master"));
+    private function assertInitialmainTag() {
+        $tags = $this->repo()->getTags(new PartialBranch("main"));
         $this->assertCount(1, $tags);
         $this->assertTagAuthors($tags[0], $this->dir()->getAuthor(), $this->dir()->getAuthor());
 
@@ -57,12 +57,12 @@ class TagTest extends GitTestCase {
         $this->repo()->switchBranch($branch);
         $this->dir()->touchFile("other-branch");
         $otherBranchCommit = $this->dir()->addAndCommitAll("On other branch");
-        $this->repo()->git(["checkout", "master"]);
+        $this->repo()->git(["checkout", "main"]);
 
         $this->repo()->tagCommit($otherBranchCommit, "on-other-branch", "Tag is on a different branch");
 
-        // Tags on master are still the same.
-        $this->assertInitialMasterTag();
+        // Tags on main are still the same.
+        $this->assertInitialmainTag();
 
         // Assert that we have our own tag on our branch.
         $this->assertTags($otherBranchCommit, ['on-other-branch', 'readme-tag']);
