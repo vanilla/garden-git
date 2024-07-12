@@ -74,7 +74,8 @@ class Repository {
      * @throws GitException If the command did not execute successfully.
      */
     public function git(array $args): string {
-        $process = new Process(array_merge([$this->gitPath], $args), $this->dir);
+        $gitPath = explode(" ", $this->gitPath);
+        $process = new Process(array_merge($gitPath, $args), $this->dir);
         $process->setTimeout(null);
         try {
             $process->mustRun();
@@ -96,7 +97,8 @@ class Repository {
      * @throws GitException If the command did not execute successfully.
      */
     public function gitIterator(array $args): \Generator {
-        $process = new Process(array_merge([$this->gitPath], $args), $this->dir);
+        $gitPath = explode(" ", $this->gitPath);
+        $process = new Process(array_merge($gitPath, $args), $this->dir);
         $process->setTimeout(null);
         $process->setIdleTimeout(null);
         $process->start();
