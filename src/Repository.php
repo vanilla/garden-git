@@ -33,12 +33,13 @@ class Repository {
      * Constructor.
      *
      * @param string $dir
+     * @param string|null $gitPath
      *
      * @throws GitException If the repository does not exist.
      */
-    public function __construct(string $dir) {
+    public function __construct(string $dir, ?string $gitPath = null) {
         $executableFinder = new ExecutableFinder();
-        $gitPath = $executableFinder->find('git');
+        $gitPath = $gitPath ?? $executableFinder->find('git');
         if ($gitPath === null) {
             // Since CI always has git installed we don't really have a way to test this.
             // @codeCoverageIgnoreStart
