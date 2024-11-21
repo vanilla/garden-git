@@ -4,9 +4,9 @@ version: 2.1
 orbs:
   codecov: codecov/codecov@3.2.2
 jobs:
-  php-tests-72:
+  php-tests-8:
     docker:
-      - image: cimg/php:7.2
+      - image: cimg/php:8.0
     steps: &php-test-steps
       # Dependency needed for generating coverage.
       - run:
@@ -38,18 +38,8 @@ jobs:
           path: ./.coverage
       - codecov/upload:
           file: ./.coverage/php-tests-coverage.xml
-  php-tests-74:
-    docker:
-      - image: cimg/php:7.4
-    steps: *php-test-steps
-  php-tests-8:
-    docker:
-      - image: cimg/php:8.0
-    steps: *php-test-steps
 workflows:
   version: 2
   commit:
     jobs:
       - php-tests-8
-      - php-tests-74
-      - php-tests-72
