@@ -20,8 +20,8 @@
         }
     },
     "require": {
-        "php": ">=7.4",
-        "vanilla/garden-http": ">=2.4",
+        "php": ">=8.0",
+        "vanilla/garden-http": "^3.0",
         "symfony/filesystem": ">=5.4",
         "symfony/process": "*",
         "vanilla/garden-schema": ">=3.0"
