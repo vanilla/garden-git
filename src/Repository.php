@@ -744,7 +744,6 @@ class Repository {
 
         $this->git([
             'push',
-            '--force-with-lease',
             '--set-upstream',
             $remote->getName(),
             "{$branchName}:{$remoteBranchName}"
